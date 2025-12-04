@@ -66,13 +66,35 @@
         }
         .theme-btn:active { transform: scale(0.9); }
 
-        /* --- Section Titles --- */
-        .section-label {
-            font-size: 14px; font-weight: 600; color: var(--text-color);
-            opacity: 0.7; margin-bottom: 8px; padding-left: 5px; display: block;
+        /* --- Accordion Styles (NEW) --- */
+        .accordion-header {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--card-bg); padding: 15px 20px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm); cursor: pointer;
+            transition: 0.2s; user-select: none;
         }
+        .accordion-header:active { transform: scale(0.98); }
+        .accordion-title {
+            font-size: 14px; font-weight: 600; color: var(--text-color); margin: 0;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .accordion-icon {
+            color: var(--text-color); opacity: 0.6; transition: transform 0.3s ease;
+        }
+        .accordion-content {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+            opacity: 0; margin-top: 0;
+        }
+        /* Open State */
+        .accordion-content.open {
+            max-height: 500px; /* Arbitrary large height */
+            opacity: 1; margin-top: 10px;
+        }
+        .accordion-header.active .accordion-icon { transform: rotate(180deg); }
 
-        /* --- 1. Bank Grid (Top) --- */
+        /* --- 1. Bank Grid (Inside Accordion) --- */
         .bank-grid-wrapper {
             background: var(--card-bg); padding: 20px; border-radius: var(--radius-lg);
             box-shadow: var(--shadow-sm);
@@ -106,9 +128,8 @@
         .bank-item.active span { opacity: 1; font-weight: 700; color: var(--text-color); }
 
         /* --- 2. Inputs --- */
-        .input-section {
-            display: flex; flex-direction: column; gap: 12px;
-        }
+        .input-section { display: flex; flex-direction: column; gap: 12px; }
+        .section-label { font-size: 14px; font-weight: 600; color: var(--text-color); opacity: 0.7; margin-bottom: 8px; padding-left: 5px; display: block; }
         .input-group { position: relative; }
         .input-box {
             width: 100%; padding: 16px 20px 16px 50px;
@@ -127,11 +148,8 @@
             background: var(--card-bg);
         }
 
-        /* --- 3. Card Preview (Bottom) --- */
-        .card-preview-container {
-            perspective: 1000px;
-            margin-top: 10px;
-        }
+        /* --- 3. Card Preview --- */
+        .card-preview-container { perspective: 1000px; margin-top: 10px; }
         .slip-wrapper {
             background-color: #fff; padding: 25px; border-radius: 20px;
             box-shadow: var(--shadow-lg); 
@@ -139,7 +157,6 @@
             border: 1px solid rgba(0,0,0,0.05);
         }
 
-        /* Card Internals */
         .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; height: 60px; }
         .bank-logo-group { display: flex; align-items: center; gap: 14px; }
         .bank-logo-img { width: 52px; height: 52px; object-fit: contain; }
@@ -171,22 +188,17 @@
             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
-        /* --- 4. Buttons (Bottom) --- */
-        .action-bar {
-            display: flex; flex-direction: column; gap: 12px;
-            margin-top: 10px; margin-bottom: 40px;
-        }
-
+        /* --- 4. Buttons --- */
+        .action-bar { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; margin-bottom: 40px; }
         .btn-download {
             width: 100%; padding: 16px; border: none; border-radius: var(--radius-md);
-            background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%); /* New Blue Gradient */
+            background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%); 
             color: white; font-size: 16px; font-weight: 700;
             display: flex; align-items: center; justify-content: center; gap: 10px;
             cursor: pointer; box-shadow: 0 8px 20px -4px rgba(37, 99, 235, 0.4);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .btn-download:active { transform: scale(0.98); box-shadow: 0 4px 10px -2px rgba(37, 99, 235, 0.4); }
-
         .btn-reset {
             background: transparent; border: none;
             color: #ef4444; font-size: 14px; font-weight: 600;
@@ -205,7 +217,6 @@
         .btn-crop, .fb-btn-continue { flex: 1; background: #22c55e; color: white; padding: 12px; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; }
         .btn-cancel, .fb-btn-back { flex: 1; background: #64748b; color: white; padding: 12px; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; }
         .fb-btn-continue { background: #3b82f6; } .fb-btn-back { background: #f1f5f9; color: #334155; }
-        
         .fb-hint { font-size: 11px; color: #94a3b8; text-align: center; margin-top: 10px; }
     </style>
 </head>
@@ -221,55 +232,51 @@
             </div>
         </div>
 
-        <!-- 2. Bank Selector (Moved to Top) -->
+        <!-- 2. Bank Selector (Accordion Style) -->
         <div>
-            <span class="section-label">ဘဏ် ရွေးချယ်ရန် (Bank)</span>
-            <div class="bank-grid-wrapper">
-                <div class="bank-grid">
-                    <div class="bank-item active" onclick="selectBank('kbank')">
-                        <div class="bank-icon" style="color: #00a950;"><img src="kbank.png"></div>
-                        <span>KBANK</span>
-                    </div>
-                    <div class="bank-item" onclick="selectBank('scb')">
-                        <div class="bank-icon" style="color: #4e2a84;"><img src="scb.png"></div>
-                        <span>SCB</span>
-                    </div>
-                    <div class="bank-item" onclick="selectBank('bbl')">
-                        <div class="bank-icon" style="color: #1e3a8a;"><img src="bbl.png"></div>
-                        <span>BBL</span>
-                    </div>
-                    <div class="bank-item" onclick="selectBank('ktb')">
-                        <div class="bank-icon" style="color: #00a5e5;"><img src="ktb.png"></div>
-                        <span>KTB</span>
-                    </div>
-                    <div class="bank-item" onclick="selectBank('bay')">
-                        <div class="bank-icon" style="color: #fec42d;"><img src="bay.png"></div>
-                        <span>BAY</span>
-                    </div>
-                    <div class="bank-item" onclick="selectBank('ttb')">
-                        <div class="bank-icon" style="color: #00569a;"><img src="ttb.png"></div>
-                        <span>TTB</span>
+            <!-- Clickable Header -->
+            <div class="accordion-header" onclick="toggleBankGrid(this)">
+                <h3 class="accordion-title">
+                    <i class="fas fa-university" style="color:#3b82f6;"></i>
+                    ဘဏ် ရွေးချယ်ရန် (Bank)
+                </h3>
+                <i class="fas fa-chevron-down accordion-icon"></i>
+            </div>
+
+            <!-- Collapsible Content -->
+            <div class="accordion-content" id="bankContent">
+                <div class="bank-grid-wrapper">
+                    <div class="bank-grid">
+                        <div class="bank-item active" onclick="selectBank('kbank')">
+                            <div class="bank-icon" style="color: #00a950;"><img src="kbank.png"></div>
+                            <span>KBANK</span>
+                        </div>
+                        <div class="bank-item" onclick="selectBank('scb')">
+                            <div class="bank-icon" style="color: #4e2a84;"><img src="scb.png"></div>
+                            <span>SCB</span>
+                        </div>
+                        <div class="bank-item" onclick="selectBank('bbl')">
+                            <div class="bank-icon" style="color: #1e3a8a;"><img src="bbl.png"></div>
+                            <span>BBL</span>
+                        </div>
+                        <div class="bank-item" onclick="selectBank('ktb')">
+                            <div class="bank-icon" style="color: #00a5e5;"><img src="ktb.png"></div>
+                            <span>KTB</span>
+                        </div>
+                        <div class="bank-item" onclick="selectBank('bay')">
+                            <div class="bank-icon" style="color: #fec42d;"><img src="bay.png"></div>
+                            <span>BAY</span>
+                        </div>
+                        <div class="bank-item" onclick="selectBank('ttb')">
+                            <div class="bank-icon" style="color: #00569a;"><img src="ttb.png"></div>
+                            <span>TTB</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 3. Inputs (Middle) -->
-        <div>
-            <span class="section-label">အချက်အလက်များ</span>
-            <div class="input-section">
-                <div class="input-group">
-                    <i class="fas fa-user input-icon"></i>
-                    <input type="text" class="input-box" id="in-name" placeholder="အမည် (Name)" oninput="update()">
-                </div>
-                <div class="input-group">
-                    <i class="fas fa-credit-card input-icon"></i>
-                    <input type="tel" class="input-box" id="in-num" placeholder="အကောင့်နံပါတ် (000-000-0000)" maxlength="12" oninput="formatNum(this)">
-                </div>
-            </div>
-        </div>
-
-        <!-- 4. Card Preview (Moved to Bottom) -->
+        <!-- 3. Card Preview (Bottom) -->
         <div class="card-preview-container">
             <div class="slip-wrapper" id="card-canvas">
                 <div class="card-header">
@@ -300,6 +307,21 @@
                 </div>
             </div>
         </div>
+        
+         <!-- 4. Inputs (Middle) -->
+        <div>
+            <span class="section-label">အချက်အလက်များ</span>
+            <div class="input-section">
+                <div class="input-group">
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text" class="input-box" id="in-name" placeholder="အမည် (Name)" oninput="update()">
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-credit-card input-icon"></i>
+                    <input type="tel" class="input-box" id="in-num" placeholder="အကောင့်နံပါတ် (000-000-0000)" maxlength="12" oninput="formatNum(this)">
+                </div>
+            </div>
+        </div>
 
         <!-- 5. Actions -->
         <div class="action-bar">
@@ -311,8 +333,6 @@
             <button class="btn-reset" onclick="resetAll()">
                 <i class="fas fa-redo-alt"></i> အသစ်ပြန်စမည် (Reset)
             </button>
-            
-            
         </div>
 
     </div>
@@ -360,6 +380,13 @@
         }
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') { document.body.setAttribute('data-theme', 'dark'); document.getElementById('themeIcon').classList.replace('fa-moon', 'fa-sun'); }
+
+        // --- Toggle Bank Grid Logic (NEW) ---
+        function toggleBankGrid(headerElement) {
+            const content = document.getElementById('bankContent');
+            content.classList.toggle('open');
+            headerElement.classList.toggle('active');
+        }
 
         // --- Bank Data ---
         const banks = {
@@ -432,6 +459,9 @@
                 document.getElementById('display-label').style.color = 'white';
                 document.getElementById('display-name').style.color = 'white';
             }
+            
+            // Optional: Close grid after selection
+            // toggleBankGrid(document.querySelector('.accordion-header')); 
         }
 
         function handleQR(input) {
