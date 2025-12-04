@@ -4,180 +4,272 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bank Card Maker</title>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&family=Sarabun:wght@400;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Cropper CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     
-    <!-- PWA Setup -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#ffffff">
-    <link rel="apple-touch-icon" href="logo.png">
-
     <style>
-        /* --- CSS Variables --- */
+        /* --- Modern CSS Variables --- */
         :root {
-            --bg-color: #f4f6f8; --text-color: #333; --container-bg: #ffffff;
-            --input-bg: #ffffff; --input-border: #e0e0e0; --icon-color: #555;
-            --shadow: 0 10px 40px rgba(0,0,0,0.08); --modal-bg: #ffffff;
+            --bg-color: #f0f4f8;
+            --text-color: #1e293b;
+            --card-bg: #ffffff;
+            --input-bg: #f8fafc;
+            --border-color: #e2e8f0;
+            --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+            --radius-lg: 24px;
+            --radius-md: 16px;
         }
 
         [data-theme="dark"] {
-            --bg-color: #121212; --text-color: #e0e0e0; --container-bg: #1e1e1e;
-            --input-bg: #2d2d2d; --input-border: #444; --icon-color: #bbb;
-            --shadow: 0 10px 40px rgba(0,0,0,0.5); --modal-bg: #2d2d2d;
+            --bg-color: #0f172a;
+            --text-color: #f1f5f9;
+            --card-bg: #1e293b;
+            --input-bg: #334155;
+            --border-color: #475569;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
         body {
             font-family: 'Prompt', sans-serif;
-            background: var(--bg-color); margin: 0; padding: 20px 15px;
+            background: var(--bg-color); margin: 0; padding: 20px;
             display: flex; justify-content: center; min-height: 100vh;
-            color: var(--text-color); transition: background 0.3s, color 0.3s;
+            color: var(--text-color); transition: all 0.3s ease;
         }
 
-        .container { width: 100%; max-width: 420px; background: transparent; }
-
-        /* Header */
-        .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .app-title { font-size: 20px; font-weight: 700; color: var(--text-color); margin: 0; }
-        .theme-toggle { font-size: 20px; color: var(--icon-color); cursor: pointer; padding: 10px; border-radius: 50%; transition: 0.3s; }
-        .theme-toggle:hover { background: rgba(0,0,0,0.1); }
-
-        /* --- CARD PREVIEW AREA --- */
-        .card-preview-container {
-            background: var(--container-bg); padding: 20px;
-            border-radius: 20px; box-shadow: var(--shadow);
-            margin-bottom: 25px; transition: background 0.3s;
+        .container { 
+            width: 100%; max-width: 440px; 
+            display: flex; flex-direction: column; gap: 20px;
         }
 
-        .slip-wrapper {
-            background-color: #fff; padding: 20px; border-radius: 16px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05); border: 1px solid #eee;
-            position: relative; overflow: hidden; transition: all 0.3s ease;
+        /* --- Header --- */
+        .app-header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 10px 5px;
         }
-
-        /* Card Elements */
-        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; height: 60px; }
-        .bank-logo-group { display: flex; align-items: center; gap: 12px; }
-        .bank-logo-img { width: 50px; height: 50px; object-fit: contain; border-radius: 50%; }
-        .bank-info h1 { margin: 0; font-size: 22px; font-weight: 800; line-height: 1; letter-spacing: -0.5px; }
-        .bank-info p { margin: 3px 0 0 0; font-size: 11px; color: #888; font-weight: 600; font-family: 'Sarabun', sans-serif; }
-        
-        .qr-box {
-            width: 60px; height: 60px; border: 1px dashed #ccc; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 10px; color: #aaa; background: #fafafa;
-            overflow: hidden; position: relative; cursor: pointer;
+        .app-title { 
+            font-size: 24px; font-weight: 800; 
+            background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin: 0; letter-spacing: -0.5px;
         }
-        .qr-box img { width: 100%; height: 100%; object-fit: cover; display: none; }
-        .qr-box i { font-size: 20px; margin-bottom: 2px; }
-        .qr-placeholder { display: flex; flex-direction: column; align-items: center; pointer-events: none;}
-
-        .card-row { display: flex; align-items: center; margin-bottom: 15px; gap: 10px; }
-        .card-label {
-            padding: 4px 8px; border-radius: 4px; color: white;
-            font-size: 11px; font-weight: 700; text-transform: uppercase; flex-shrink: 0;
-        }
-        .card-number { font-size: 22px; font-weight: 700; color: #444; letter-spacing: 0.5px; font-family: 'Sarabun', sans-serif; }
-        .card-name-bar {
-            padding: 10px; text-align: center; color: white;
-            font-size: 16px; font-weight: 700; text-transform: uppercase;
-            border-radius: 6px; width: 100%;
-        }
-
-        /* --- CONTROLS --- */
-        .section-title {
-            font-size: 13px; font-weight: 600; color: var(--icon-color);
-            margin-bottom: 5px; /* Reduced spacing as requested */
-            display: block; opacity: 0.9;
-        }
-
-        /* Download Button */
-        .download-btn {
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            width: auto; min-width: 200px; margin: 0 auto 15px auto; padding: 12px 30px;
-            background: linear-gradient(90deg, #6c5ce7, #a29bfe);
-            color: white; border: none; border-radius: 50px;
-            font-size: 14px; font-weight: 600; 
-            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
-            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .download-btn:active { transform: scale(0.95); box-shadow: 0 2px 5px rgba(108, 92, 231, 0.4); }
-        .fb-hint { font-size: 11px; color: var(--icon-color); text-align: center; margin-bottom: 25px; opacity: 0.7; }
-
-        /* Reset Button Style */
-        .reset-btn {
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            width: 100%; padding: 12px;
-            background: #ff7675; /* Soft Red */
-            color: white; border: none; border-radius: 12px;
-            font-size: 14px; font-weight: 600;
-            cursor: pointer; margin-top: 10px; margin-bottom: 30px;
+        .theme-btn {
+            background: var(--card-bg); width: 40px; height: 40px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--shadow-sm); cursor: pointer; color: var(--text-color);
             transition: 0.2s;
         }
-        .reset-btn:active { transform: scale(0.98); background: #d63031; }
+        .theme-btn:active { transform: scale(0.9); }
 
-        /* Bank Grid */
-        .bank-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 25px; }
+        /* --- Section Titles --- */
+        .section-label {
+            font-size: 14px; font-weight: 600; color: var(--text-color);
+            opacity: 0.7; margin-bottom: 8px; padding-left: 5px; display: block;
+        }
+
+        /* --- 1. Bank Grid (Top) --- */
+        .bank-grid-wrapper {
+            background: var(--card-bg); padding: 20px; border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+        .bank-grid { 
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; 
+        }
         .bank-item {
             display: flex; flex-direction: column; align-items: center; gap: 8px;
-            cursor: pointer; opacity: 0.6; transition: 0.3s;
+            cursor: pointer; position: relative;
         }
-        .bank-item.active { opacity: 1; transform: translateY(-5px); }
         .bank-icon {
-            width: 50px; height: 50px; border-radius: 16px;
+            width: 55px; height: 55px; border-radius: 18px;
+            background: var(--bg-color); padding: 8px;
             display: flex; align-items: center; justify-content: center;
-            background: var(--container-bg); box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            font-size: 24px; font-weight: bold; overflow: hidden;
-            border: 2px solid transparent; transition: border-color 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
         }
-        .bank-item.active .bank-icon { border-color: currentColor; }
-        .bank-item span { font-size: 10px; font-weight: 600; color: var(--text-color); }
-        .bank-icon img { width: 100%; height: 100%; object-fit: cover; }
+        .bank-icon img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+        .bank-item span { 
+            font-size: 11px; font-weight: 600; opacity: 0.7; transition: 0.3s;
+        }
+        
+        /* Active State */
+        .bank-item.active .bank-icon {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px -5px rgba(0,0,0,0.15);
+            background: #fff;
+            border-color: currentColor; 
+        }
+        .bank-item.active span { opacity: 1; font-weight: 700; color: var(--text-color); }
 
-        /* Inputs (With Icons & Close Spacing) */
-        .input-group { margin-bottom: 12px; }
-        .input-wrapper { position: relative; width: 100%; }
-        .input-icon {
-            position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
-            color: #888; font-size: 16px; z-index: 2; pointer-events: none;
+        /* --- 2. Inputs --- */
+        .input-section {
+            display: flex; flex-direction: column; gap: 12px;
         }
+        .input-group { position: relative; }
         .input-box {
-            width: 100%; padding: 14px 15px 14px 45px; /* Space for icon */
-            border: 1px solid var(--input-border); background: var(--input-bg);
-            color: var(--text-color); border-radius: 12px;
-            font-size: 15px; font-family: 'Sarabun', sans-serif; transition: 0.3s;
+            width: 100%; padding: 16px 20px 16px 50px;
+            background: var(--card-bg); border: 2px solid transparent;
+            border-radius: var(--radius-md); color: var(--text-color);
+            font-family: 'Sarabun', sans-serif; font-size: 16px; font-weight: 500;
+            box-shadow: var(--shadow-sm); transition: 0.3s;
         }
-        .input-box:focus { border-color: #6c5ce7; box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1); }
+        .input-box::placeholder { color: var(--text-color); opacity: 0.4; }
+        .input-icon {
+            position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+            color: var(--text-color); opacity: 0.5; font-size: 18px; pointer-events: none;
+        }
+        .input-box:focus {
+            border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            background: var(--card-bg);
+        }
 
-        /* Modals */
-        .crop-modal-overlay, .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 5000; backdrop-filter: blur(5px); }
-        .crop-modal-content, .modal-content { background: var(--modal-bg); color: var(--text-color); padding: 25px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
-        .crop-container { width: 100%; height: 300px; margin-bottom: 20px; background: #333; overflow: hidden; border-radius: 8px; }
-        .crop-container img { max-width: 100%; }
-        .crop-actions { display: flex; gap: 10px; justify-content: center; }
+        /* --- 3. Card Preview (Bottom) --- */
+        .card-preview-container {
+            perspective: 1000px;
+            margin-top: 10px;
+        }
+        .slip-wrapper {
+            background-color: #fff; padding: 25px; border-radius: 20px;
+            box-shadow: var(--shadow-lg); 
+            position: relative; overflow: hidden; 
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* Card Internals */
+        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; height: 60px; }
+        .bank-logo-group { display: flex; align-items: center; gap: 14px; }
+        .bank-logo-img { width: 52px; height: 52px; object-fit: contain; }
+        .bank-info h1 { margin: 0; font-size: 24px; font-weight: 800; line-height: 1; letter-spacing: -0.5px; }
+        .bank-info p { margin: 4px 0 0 0; font-size: 12px; color: #94a3b8; font-weight: 600; font-family: 'Sarabun', sans-serif; }
         
-        .btn-crop { background: #00a950; color: white; padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1; }
-        .btn-cancel { background: #636e72; color: white; padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1; }
-        .fb-btn-back { background: #f1f2f6; color: #555; padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
-        .fb-btn-continue { background: #1877f2; color: white; padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
+        .qr-box {
+            width: 64px; height: 64px; border: 2px dashed #cbd5e1; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; color: #94a3b8; background: #f8fafc;
+            overflow: hidden; position: relative; cursor: pointer; transition: 0.2s;
+        }
+        .qr-box:hover { border-color: #3b82f6; color: #3b82f6; }
+        .qr-box img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .qr-box i { font-size: 22px; margin-bottom: 2px; }
+        .qr-placeholder { display: flex; flex-direction: column; align-items: center; pointer-events: none;}
         
+        .card-row { display: flex; align-items: center; margin-bottom: 18px; gap: 12px; }
+        .card-label {
+            padding: 5px 10px; border-radius: 6px; color: white;
+            font-size: 11px; font-weight: 700; text-transform: uppercase; flex-shrink: 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .card-number { font-size: 26px; font-weight: 700; color: #334155; letter-spacing: 0.5px; font-family: 'Sarabun', sans-serif; }
+        .card-name-bar {
+            padding: 12px; text-align: center; color: white;
+            font-size: 18px; font-weight: 700; text-transform: uppercase;
+            border-radius: 12px; width: 100%;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* --- 4. Buttons (Bottom) --- */
+        .action-bar {
+            display: flex; flex-direction: column; gap: 12px;
+            margin-top: 10px; margin-bottom: 40px;
+        }
+
+        .btn-download {
+            width: 100%; padding: 16px; border: none; border-radius: var(--radius-md);
+            background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%); /* New Blue Gradient */
+            color: white; font-size: 16px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            cursor: pointer; box-shadow: 0 8px 20px -4px rgba(37, 99, 235, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-download:active { transform: scale(0.98); box-shadow: 0 4px 10px -2px rgba(37, 99, 235, 0.4); }
+
+        .btn-reset {
+            background: transparent; border: none;
+            color: #ef4444; font-size: 14px; font-weight: 600;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            cursor: pointer; padding: 10px; opacity: 0.8; transition: 0.2s;
+        }
+        .btn-reset:hover { opacity: 1; background: rgba(239, 68, 68, 0.05); border-radius: 8px; }
+
+        /* --- Modals & Utilities --- */
         .upload-btn { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .crop-modal-overlay, .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 5000; backdrop-filter: blur(8px); }
+        .crop-modal-content, .modal-content { background: var(--card-bg); color: var(--text-color); padding: 25px; border-radius: 24px; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+        .crop-container { width: 100%; height: 300px; margin-bottom: 20px; background: #000; overflow: hidden; border-radius: 16px; }
+        .crop-container img { max-width: 100%; }
+        .crop-actions { display: flex; gap: 12px; }
+        .btn-crop, .fb-btn-continue { flex: 1; background: #22c55e; color: white; padding: 12px; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; }
+        .btn-cancel, .fb-btn-back { flex: 1; background: #64748b; color: white; padding: 12px; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; }
+        .fb-btn-continue { background: #3b82f6; } .fb-btn-back { background: #f1f5f9; color: #334155; }
+        
+        .fb-hint { font-size: 11px; color: #94a3b8; text-align: center; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <div class="container">
         
-        <!-- Header -->
+        <!-- 1. Header -->
         <div class="app-header">
             <h1 class="app-title">Bank Card Maker</h1>
-            <i class="fas fa-moon theme-toggle" onclick="toggleTheme()" id="themeIcon"></i>
+            <div class="theme-btn" onclick="toggleTheme()">
+                <i class="fas fa-moon" id="themeIcon"></i>
+            </div>
         </div>
 
-        <!-- 1. Card Preview (Defaults to K-Bank) -->
+        <!-- 2. Bank Selector (Moved to Top) -->
+        <div>
+            <span class="section-label">ဘဏ် ရွေးချယ်ရန် (Bank)</span>
+            <div class="bank-grid-wrapper">
+                <div class="bank-grid">
+                    <div class="bank-item active" onclick="selectBank('kbank')">
+                        <div class="bank-icon" style="color: #00a950;"><img src="kbank.png"></div>
+                        <span>KBANK</span>
+                    </div>
+                    <div class="bank-item" onclick="selectBank('scb')">
+                        <div class="bank-icon" style="color: #4e2a84;"><img src="scb.png"></div>
+                        <span>SCB</span>
+                    </div>
+                    <div class="bank-item" onclick="selectBank('bbl')">
+                        <div class="bank-icon" style="color: #1e3a8a;"><img src="bbl.png"></div>
+                        <span>BBL</span>
+                    </div>
+                    <div class="bank-item" onclick="selectBank('ktb')">
+                        <div class="bank-icon" style="color: #00a5e5;"><img src="ktb.png"></div>
+                        <span>KTB</span>
+                    </div>
+                    <div class="bank-item" onclick="selectBank('bay')">
+                        <div class="bank-icon" style="color: #fec42d;"><img src="bay.png"></div>
+                        <span>BAY</span>
+                    </div>
+                    <div class="bank-item" onclick="selectBank('ttb')">
+                        <div class="bank-icon" style="color: #00569a;"><img src="ttb.png"></div>
+                        <span>TTB</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Inputs (Middle) -->
+        <div>
+            <span class="section-label">အချက်အလက်များ</span>
+            <div class="input-section">
+                <div class="input-group">
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text" class="input-box" id="in-name" placeholder="အမည် (Name)" oninput="update()">
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-credit-card input-icon"></i>
+                    <input type="tel" class="input-box" id="in-num" placeholder="အကောင့်နံပါတ် (000-000-0000)" maxlength="12" oninput="formatNum(this)">
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Card Preview (Moved to Bottom) -->
         <div class="card-preview-container">
             <div class="slip-wrapper" id="card-canvas">
                 <div class="card-header">
@@ -209,89 +301,41 @@
             </div>
         </div>
 
-        <!-- 2. Action -->
-        <button class="download-btn" onclick="download()">
-            <i class="fas fa-download"></i> ပုံသိမ်းမည်
-        </button>
-        <div class="fb-hint">
-            Facebook Browser တွင် Download မရပါက ညာဘက်အပေါ် (...) နှိပ်ပြီး "Open in Chrome" ဖြင့်ဖွင့်ပါ
+        <!-- 5. Actions -->
+        <div class="action-bar">
+            <button class="btn-download" onclick="download()">
+                <i class="fas fa-cloud-download-alt"></i> 
+                <span>ပုံသိမ်းမည် (Save Image)</span>
+            </button>
+            
+            <button class="btn-reset" onclick="resetAll()">
+                <i class="fas fa-redo-alt"></i> အသစ်ပြန်စမည် (Reset)
+            </button>
+            
+            
         </div>
-
-        <!-- 3. Bank Selector -->
-        <span class="section-title">ဘဏ် ရွေးချယ်ရန် (Bank)</span>
-        <div class="bank-grid">
-            <div class="bank-item active" onclick="selectBank('kbank')">
-                <div class="bank-icon" style="color: #00a950;"><img src="kbank.png"></div>
-                <span>KBANK</span>
-            </div>
-            <div class="bank-item" onclick="selectBank('scb')">
-                <div class="bank-icon" style="color: #4e2a84;"><img src="scb.png"></div>
-                <span>SCB</span>
-            </div>
-            <div class="bank-item" onclick="selectBank('bbl')">
-                <div class="bank-icon" style="color: #1e3a8a;"><img src="bbl.png"></div>
-                <span>BBL</span>
-            </div>
-            <div class="bank-item" onclick="selectBank('ktb')">
-                <div class="bank-icon" style="color: #00a5e5;"><img src="ktb.png"></div>
-                <span>KTB</span>
-            </div>
-            <div class="bank-item" onclick="selectBank('bay')">
-                <div class="bank-icon" style="color: #fec42d;"><img src="bay.png"></div>
-                <span>BAY</span>
-            </div>
-            <div class="bank-item" onclick="selectBank('ttb')">
-                <div class="bank-icon" style="color: #00569a;"><img src="ttb.png"></div>
-                <span>TTB</span>
-            </div>
-        </div>
-
-        <!-- 4. Inputs (Icons Added & Close Spacing) -->
-        <span class="section-title">အချက်အလက်များ</span>
-        
-        <div class="input-group">
-            <div class="input-wrapper">
-                <i class="fas fa-user input-icon"></i>
-                <input type="text" class="input-box" id="in-name" placeholder="အမည် (Name)" oninput="update()">
-            </div>
-        </div>
-
-        <div class="input-group">
-            <div class="input-wrapper">
-                <i class="fas fa-credit-card input-icon"></i>
-                <input type="tel" class="input-box" id="in-num" placeholder="အကောင့်နံပါတ် (000-000-0000)" maxlength="12" oninput="formatNum(this)">
-            </div>
-        </div>
-
-        <!-- NEW: Reset Button -->
-        <button class="reset-btn" onclick="resetAll()">
-            <i class="fas fa-redo"></i> အသစ်ပြန်စမည် (Reset All)
-        </button>
 
     </div>
 
-    <!-- CROP MODAL -->
+    <!-- Modals (Same as before) -->
     <div class="crop-modal-overlay" id="cropModal">
         <div class="crop-modal-content">
             <h3 style="margin-top:0;">Crop QR Code</h3>
-            <div class="crop-container">
-                <img id="image-to-crop" src="">
-            </div>
+            <div class="crop-container"><img id="image-to-crop" src=""></div>
             <div class="crop-actions">
-                <button class="btn-cancel" onclick="closeCropModal()">မလုပ်တော့ပါ</button>
-                <button class="btn-crop" onclick="cropImage()">ဖြတ်မည် (Crop)</button>
+                <button class="btn-cancel" onclick="closeCropModal()">Cancel</button>
+                <button class="btn-crop" onclick="cropImage()">Crop</button>
             </div>
         </div>
     </div>
 
-    <!-- FB Warning Modal -->
     <div class="modal-overlay" id="fbModal">
         <div class="modal-content">
-            <h3 style="color:#1877f2; margin-top:0;"><i class="fab fa-facebook"></i> Browser Warning</h3>
-            <p style="font-size:14px; opacity:0.8;">Facebook App အတွင်း Download မရနိုင်ပါ။ Chrome တွင်ဖွင့်ရန် ကြိုးစားပေးပါမည်။</p>
+            <h3 style="color:#3b82f6; margin-top:0;"><i class="fab fa-facebook"></i> Browser Warning</h3>
+            <p style="font-size:14px; opacity:0.8;">Facebook App တွင် Download မရနိုင်ပါ။ Chrome ဖြင့်ဖွင့်မည်။</p>
             <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
-                <button class="fb-btn-back" onclick="closeFbModal()">BACK</button>
-                <button class="fb-btn-continue" onclick="forceOpenChrome()">CONTINUE</button>
+                <button class="fb-btn-back" onclick="closeFbModal()">Back</button>
+                <button class="fb-btn-continue" onclick="forceOpenChrome()">Continue</button>
             </div>
         </div>
     </div>
@@ -354,34 +398,12 @@
         let currentBank = 'kbank';
         let cropper;
 
-        // --- Init ---
         window.onload = function() {
-            // 1. Always start with K-Bank selected
             selectBank('kbank');
-
-            // 2. Check for Auto-Download
             const params = new URLSearchParams(window.location.search);
-            const nameParam = params.get('name');
-            const numParam = params.get('num');
-            const autoParam = params.get('auto');
-
-            if (nameParam) {
-                document.getElementById('in-name').value = decodeURIComponent(nameParam);
-                update();
-            }
-            if (numParam) {
-                document.getElementById('in-num').value = decodeURIComponent(numParam);
-                formatNum(document.getElementById('in-num'));
-            }
-
-            if (autoParam === 'true') {
-                setTimeout(() => {
-                    generateAndDownload();
-                    // URL Reset
-                    const cleanUrl = window.location.pathname;
-                    window.history.replaceState({}, document.title, cleanUrl);
-                }, 1000); 
-            }
+            if (params.get('name')) { document.getElementById('in-name').value = decodeURIComponent(params.get('name')); update(); }
+            if (params.get('num')) { document.getElementById('in-num').value = decodeURIComponent(params.get('num')); formatNum(document.getElementById('in-num')); }
+            if (params.get('auto') === 'true') { setTimeout(() => { generateAndDownload(); window.history.replaceState({}, document.title, window.location.pathname); }, 1000); }
         };
 
         function selectBank(bankKey) {
@@ -397,13 +419,12 @@
             
             const logoEl = document.getElementById('display-logo');
             logoEl.src = config.logo;
-            logoEl.onerror = function() { this.src = 'logo.png'; }; // Fallback
+            logoEl.onerror = function() { this.src = 'logo.png'; };
 
             document.getElementById('display-label').innerText = config.labelText;
             document.getElementById('display-label').style.background = config.color;
             document.getElementById('display-name').style.background = config.gradient;
             
-            // Special text color for yellow background (BAY)
             if(bankKey === 'bay') {
                 document.getElementById('display-label').style.color = '#4e3b31';
                 document.getElementById('display-name').style.color = '#4e3b31';
@@ -420,8 +441,7 @@
                     document.getElementById('image-to-crop').src = e.target.result;
                     document.getElementById('cropModal').style.display = 'flex';
                     if (cropper) cropper.destroy();
-                    const image = document.getElementById('image-to-crop');
-                    cropper = new Cropper(image, { aspectRatio: 1, viewMode: 1 });
+                    cropper = new Cropper(document.getElementById('image-to-crop'), { aspectRatio: 1, viewMode: 1 });
                 };
                 reader.readAsDataURL(input.files[0]);
             }
@@ -431,69 +451,37 @@
         function cropImage() {
             if (cropper) {
                 const canvas = cropper.getCroppedCanvas({ width: 300, height: 300 });
-                const croppedDataUrl = canvas.toDataURL();
-                document.getElementById('display-qr').src = croppedDataUrl;
+                document.getElementById('display-qr').src = canvas.toDataURL();
                 document.getElementById('display-qr').style.display = 'block';
                 document.getElementById('qr-placeholder').style.display = 'none';
                 closeCropModal();
             }
         }
 
-        function closeCropModal() {
-            document.getElementById('cropModal').style.display = 'none';
-            if (cropper) cropper.destroy();
-        }
-
-        function update() {
-            let val = document.getElementById('in-name').value;
-            document.getElementById('display-name').innerText = val ? val.toUpperCase() : "NAME HERE";
-        }
-
+        function closeCropModal() { document.getElementById('cropModal').style.display = 'none'; if (cropper) cropper.destroy(); }
+        function update() { const val = document.getElementById('in-name').value; document.getElementById('display-name').innerText = val ? val.toUpperCase() : "NAME HERE"; }
         function formatNum(input) {
             let val = input.value.replace(/\D/g, '');
-            let formatted = val;
-            if (val.length > 6) formatted = val.substring(0, 3) + '-' + val.substring(3, 6) + '-' + val.substring(6, 10);
-            else if (val.length > 3) formatted = val.substring(0, 3) + '-' + val.substring(3, 6);
-            input.value = formatted;
-            document.getElementById('display-num').innerText = formatted || "000-000-0000";
+            if (val.length > 6) val = val.substring(0, 3) + '-' + val.substring(3, 6) + '-' + val.substring(6, 10);
+            else if (val.length > 3) val = val.substring(0, 3) + '-' + val.substring(3, 6);
+            input.value = val;
+            document.getElementById('display-num').innerText = val || "000-000-0000";
         }
-
-        // --- NEW RESET FUNCTION ---
         function resetAll() {
-            // 1. Clear Inputs
-            document.getElementById('in-name').value = '';
-            document.getElementById('in-num').value = '';
-            
-            // 2. Reset Preview Text
-            update(); // Reset name
-            document.getElementById('display-num').innerText = '000-000-0000'; // Reset number
-
-            // 3. Reset QR
-            document.getElementById('display-qr').src = '';
-            document.getElementById('display-qr').style.display = 'none';
+            document.getElementById('in-name').value = ''; document.getElementById('in-num').value = '';
+            update(); document.getElementById('display-num').innerText = '000-000-0000';
+            document.getElementById('display-qr').src = ''; document.getElementById('display-qr').style.display = 'none';
             document.getElementById('qr-placeholder').style.display = 'flex';
-
-            // 4. Reset Bank (to KBank)
             selectBank('kbank');
         }
 
         function download() {
             const ua = navigator.userAgent || navigator.vendor || window.opera;
-            const isFacebook = (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1);
-
-            if (isFacebook) {
-                // 1. Save data
-                const nameVal = document.getElementById('in-name').value;
-                const numVal = document.getElementById('in-num').value;
-                
-                // 2. Construct Intent URL
-                const baseUrl = window.location.href.split('?')[0];
-                const targetUrl = `${baseUrl}?name=${encodeURIComponent(nameVal)}&num=${encodeURIComponent(numVal)}&auto=true`;
-                const cleanTarget = targetUrl.replace(/^https?:\/\//, '');
-                const intentUrl = `intent://${cleanTarget}#Intent;scheme=https;package=com.android.chrome;end`;
-                
-                // 3. Store & Show Dialog
-                window.targetIntentUrl = intentUrl;
+            if ((ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1)) {
+                const name = encodeURIComponent(document.getElementById('in-name').value);
+                const num = encodeURIComponent(document.getElementById('in-num').value);
+                const target = window.location.href.split('?')[0].replace(/^https?:\/\//, '') + `?name=${name}&num=${num}&auto=true`;
+                window.targetIntentUrl = `intent://${target}#Intent;scheme=https;package=com.android.chrome;end`;
                 document.getElementById('fbModal').style.display = 'flex';
                 return;
             }
@@ -502,25 +490,14 @@
 
         function generateAndDownload() {
             const el = document.getElementById('card-canvas');
-            const originalRadius = el.style.borderRadius;
-            el.style.borderRadius = '0'; // Square for download
-
+            const originalRadius = el.style.borderRadius; el.style.borderRadius = '0';
             html2canvas(el, { scale: 3, backgroundColor: "#ffffff" }).then(canvas => {
-                el.style.borderRadius = originalRadius; // Restore UI
-                canvas.toBlob(function(blob) {
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.download = currentBank + '-card.png';
-                    link.href = url; document.body.appendChild(link); link.click();
-                    document.body.removeChild(link); URL.revokeObjectURL(url);
-                }, 'image/png');
+                el.style.borderRadius = originalRadius;
+                const link = document.createElement('a'); link.download = currentBank + '-card.png';
+                link.href = canvas.toDataURL('image/png'); link.click();
             });
         }
-
-        function forceOpenChrome() {
-            if (window.targetIntentUrl) window.location.href = window.targetIntentUrl;
-        }
-
+        function forceOpenChrome() { if (window.targetIntentUrl) window.location.href = window.targetIntentUrl; }
         function closeFbModal() { document.getElementById('fbModal').style.display = 'none'; }
     </script>
 </body>
