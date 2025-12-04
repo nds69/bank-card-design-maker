@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bank Card Maker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&family=Sarabun:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Cropper CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    
+    <!-- PWA Setup -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="apple-touch-icon" href="logo.png">
+
+    <style>
+        /* --- CSS Variables for Theme --- */
+        :root {
+            --bg-color: #f4f6f8;
+            --text-color: #333;
+            --container-bg: #ffffff;
+            --input-bg: #ffffff;
+            --input-border: #e0e0e0;
+            --icon-color: #555;
+            --shadow: 0 10px 40px rgba(0,0,0,0.08);
+            --modal-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --container-bg: #1e1e1e;
+            --input-bg: #2d2d2d;
+            --input-border: #444;
+            --icon-color: #bbb;
+            --shadow: 0 10px 40px rgba(0,0,0,0.5);
+            --modal-bg: #2d2d2d;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        
+        body {
+            font-family: 'Prompt', sans-serif;
+            background: var(--bg-color);
+            margin: 0; padding: 20px 15px;
+            display: flex; justify-content: center;
+            min-height: 100vh;
+            color: var(--text-color);
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .container {
+            width: 100%; max-width: 420px;
+            background: transparent;
+        }
+
+        /* Header */
+        .app-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px;
+        }
+        .app-title { font-size: 20px; font-weight: 700; color: var(--text-color); margin: 0; }
+        .theme-toggle { 
+            font-size: 20px; color: var(--icon-color); 
+            cursor: pointer; padding: 10px; border-radius: 50%;
+            transition: 0.3s;
+        }
+        .theme-toggle:hover { background: rgba(0,0,0,0.1); }
+
+        /* --- CARD PREVIEW AREA --- */
+        .card-preview-container {
+            background: var(--container-bg);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+            transition: background 0.3s;
+        }
+
+        .slip-wrapper {
+            background-color: #fff; /* Card always white base */
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Card Header */
+        .card-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px; height: 60px;
+        }
+        .bank-logo-group { display: flex; align-items: center; gap: 12px; }
+        .bank-logo-img { width: 50px; height: 50px; object-fit: contain; border-radius: 50%; }
+        .bank-info h1 { margin: 0; font-size: 22px; font-weight: 800; line-height: 1; letter-spacing: -0.5px; }
+        .bank-info p { margin: 3px 0 0 0; font-size: 11px; color: #888; font-weight: 600; font-family: 'Sarabun', sans-serif; }
+        
+        .qr-box {
+            width: 60px; height: 60px; border: 1px dashed #ccc; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; color: #aaa; background: #fafafa;
+            overflow: hidden; position: relative; cursor: pointer;
+        }
+        .qr-box img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .qr-box i { font-size: 20px; margin-bottom: 2px; }
+        .qr-placeholder { display: flex; flex-direction: column; align-items: center; pointer-events: none;}
+
+        /* Card Body */
+        .card-row { display: flex; align-items: center; margin-bottom: 15px; gap: 10px; }
+        .card-label {
+            padding: 4px 8px; border-radius: 4px; color: white;
+            font-size: 11px; font-weight: 700; text-transform: uppercase;
+            flex-shrink: 0;
+        }
+        .card-number { font-size: 22px; font-weight: 700; color: #444; letter-spacing: 0.5px; font-family: 'Sarabun', sans-serif; }
+        
+        .card-name-bar {
+            padding: 10px; text-align: center; color: white;
+            font-size: 16px; font-weight: 700; text-transform: uppercase;
+            border-radius: 6px; width: 100%;
+        }
+
+        /* --- CONTROLS SECTION --- */
+        .section-title {
+            font-size: 13px; font-weight: 600; color: var(--icon-color);
+            margin-bottom: 15px; display: block; opacity: 0.8;
+        }
+
+        /* NEW Download Button Design (Smaller & Centered) */
+        .download-btn {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            width: auto; min-width: 200px; /* Fix Width */
+            margin: 0 auto 15px auto; /* Center */
+            padding: 12px 30px;
+            background: linear-gradient(90deg, #6c5ce7, #a29bfe);
+            color: white; border: none; border-radius: 50px;
+            font-size: 14px; font-weight: 600; 
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .download-btn:active { transform: scale(0.95); box-shadow: 0 2px 5px rgba(108, 92, 231, 0.4); }
+        .download-btn i { font-size: 16px; }
+
+        .fb-hint { font-size: 11px; color: var(--icon-color); text-align: center; margin-bottom: 30px; line-height: 1.4; opacity: 0.7; }
+
+        /* Bank Grid */
+        .bank-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+            margin-bottom: 30px;
+        }
+        .bank-item {
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            cursor: pointer; opacity: 0.6; transition: 0.3s;
+        }
+        .bank-item.active { opacity: 1; transform: translateY(-5px); }
+        .bank-icon {
+            width: 50px; height: 50px; border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--container-bg); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            font-size: 24px; font-weight: bold; overflow: hidden;
+            border: 2px solid transparent; transition: border-color 0.3s;
+        }
+        .bank-item.active .bank-icon { border-color: currentColor; }
+        .bank-item span { font-size: 10px; font-weight: 600; color: var(--text-color); }
+        
+        .bank-icon img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Inputs */
+        .input-group { margin-bottom: 15px; }
+        .input-box {
+            width: 100%; padding: 14px 15px;
+            border: 1px solid var(--input-border); 
+            background: var(--input-bg);
+            color: var(--text-color);
+            border-radius: 12px;
+            font-size: 15px; 
+            font-family: 'Sarabun', sans-serif;
+            transition: 0.3s;
+        }
+        .input-box:focus { border-color: #6c5ce7; box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1); }
+
+        /* --- MODALS (Dark Mode Support) --- */
+        .crop-modal-overlay, .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 5000; backdrop-filter: blur(5px); }
+        .crop-modal-content, .modal-content { 
+            background: var(--modal-bg); 
+            color: var(--text-color);
+            padding: 25px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3); 
+        }
+        .crop-container { width: 100%; height: 300px; margin-bottom: 20px; background: #333; overflow: hidden; border-radius: 8px; }
+        .crop-container img { max-width: 100%; }
+        .crop-actions { display: flex; gap: 10px; justify-content: center; }
+        
+        .btn-crop { background: #00a950; color: white; padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1; }
+        .btn-cancel { background: #636e72; color: white; padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1; }
+
+        .fb-btn-back { background: #f1f2f6; color: #555; padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
+        .fb-btn-continue { background: #1877f2; color: white; padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
+        
+        /* Upload Button */
+        .upload-btn { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- Header -->
+        <div class="app-header">
+            <h1 class="app-title">Bank Card Maker</h1>
+            <!-- Theme Toggle Icon -->
+            <i class="fas fa-moon theme-toggle" onclick="toggleTheme()" id="themeIcon"></i>
+        </div>
+
+        <!-- 1. Card Preview -->
+        <div class="card-preview-container">
+            <div class="slip-wrapper" id="card-canvas">
+                <div class="card-header">
+                    <div class="bank-logo-group">
+                        <img src="logo.png" class="bank-logo-img" id="display-logo">
+                        <div class="bank-info">
+                            <h1 id="display-bank-name">KBANK</h1>
+                            <p id="display-sub-name">ธนาคารกสิกรไทย</p>
+                        </div>
+                    </div>
+                    <div class="qr-box">
+                        <div class="qr-placeholder" id="qr-placeholder">
+                            <i class="fas fa-qrcode"></i>
+                            <span>QR</span>
+                        </div>
+                        <img id="display-qr" src="">
+                        <input type="file" class="upload-btn" accept="image/*" onchange="handleQR(this)">
+                    </div>
+                </div>
+
+                <div class="card-row">
+                    <div class="card-label" id="display-label">BANK NUMBER</div>
+                    <div class="card-number" id="display-num">000-000-0000</div>
+                </div>
+
+                <div class="card-name-bar" id="display-name">
+                    NAME HERE
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Action -->
+        <button class="download-btn" onclick="download()">
+            <i class="fas fa-download"></i> ပုံသိမ်းမည်
+        </button>
+        <div class="fb-hint">
+            Facebook App တွင် Download မရပါက ညာဘက်အပေါ် (...) နှိပ်ပြီး "Open in Chrome" ဖြင့်ဖွင့်ပါ
+        </div>
+
+        <!-- 3. Bank Selector -->
+        <span class="section-title">ဘဏ် ရွေးချယ်ရန် (Bank)</span>
+        <div class="bank-grid">
+            <div class="bank-item active" onclick="selectBank('kbank')">
+                <div class="bank-icon" style="color: #00a950;"><img src="logo.png"></div>
+                <span>KBANK</span>
+            </div>
+            <div class="bank-item" onclick="selectBank('scb')">
+                <div class="bank-icon" style="color: #4e2a84;"><img src="scb-logo.png"></div>
+                <span>SCB</span>
+            </div>
+            <div class="bank-item" onclick="selectBank('bbl')">
+                <div class="bank-icon" style="color: #1e3a8a;"><img src="bbl-logo.png"></div>
+                <span>BBL</span>
+            </div>
+            <div class="bank-item" onclick="selectBank('ktb')">
+                <div class="bank-icon" style="color: #00a5e5;"><img src="ktb-logo.png"></div>
+                <span>KTB</span>
+            </div>
+            <div class="bank-item" onclick="selectBank('bay')">
+                <div class="bank-icon" style="color: #fec42d;"><img src="krungsri-logo.png"></div>
+                <span>BAY</span>
+            </div>
+            <div class="bank-item" onclick="selectBank('ttb')">
+                <div class="bank-icon" style="color: #00569a;"><img src="ttb-logo.png"></div>
+                <span>TTB</span>
+            </div>
+        </div>
+
+        <!-- 4. Inputs -->
+        <span class="section-title">အချက်အလက်များ</span>
+        <div class="input-group">
+            <input type="text" class="input-box" id="in-name" placeholder="အမည် (Name)" oninput="update()">
+        </div>
+        <div class="input-group">
+            <input type="tel" class="input-box" id="in-num" placeholder="အကောင့်နံပါတ် (000-000-0000)" maxlength="12" oninput="formatNum(this)">
+        </div>
+
+    </div>
+
+    <!-- CROP MODAL -->
+    <div class="crop-modal-overlay" id="cropModal">
+        <div class="crop-modal-content">
+            <h3 style="margin-top:0;">Crop QR Code</h3>
+            <div class="crop-container">
+                <img id="image-to-crop" src="">
+            </div>
+            <div class="crop-actions">
+                <button class="btn-cancel" onclick="closeCropModal()">မလုပ်တော့ပါ</button>
+                <button class="btn-crop" onclick="cropImage()">ဖြတ်မည် (Crop)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FB Warning Modal -->
+    <div class="modal-overlay" id="fbModal">
+        <div class="modal-content">
+            <h3 style="color:#1877f2; margin-top:0;"><i class="fab fa-facebook"></i> Browser Warning</h3>
+            <p style="font-size:14px; opacity:0.8;">Facebook App အတွင်း Download မရနိုင်ပါ။ Chrome တွင်ဖွင့်ရန် ကြိုးစားပေးပါမည်။</p>
+            <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
+                <button class="fb-btn-back" onclick="closeFbModal()">BACK</button>
+                <button class="fb-btn-continue" onclick="forceOpenChrome()">CONTINUE</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+    <script>
+        // --- Theme Logic ---
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Check saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+            document.getElementById('themeIcon').classList.replace('fa-moon', 'fa-sun');
+        }
+
+        // --- Bank Data ---
+        const banks = {
+            kbank: {
+                name: 'KBANK', sub: 'ธนาคารกสิกรไทย', logo: 'logo.png',
+                color: '#00a950', gradient: 'linear-gradient(90deg, #00a950 0%, #007a37 100%)',
+                labelColor: '#00a950', labelText: 'BANK NUMBER'
+            },
+            scb: {
+                name: 'SCB', sub: 'ไทยพาณิชย์', logo: 'scb-logo.png',
+                color: '#4e2a84', gradient: 'linear-gradient(90deg, #4e2a84 0%, #7d4198 100%)',
+                labelColor: '#4e2a84', labelText: 'SCB EASY'
+            },
+            bbl: {
+                name: 'BBL', sub: 'ธนาคารกรุงเทพ', logo: 'bbl-logo.png',
+                color: '#1e3a8a', gradient: 'linear-gradient(90deg, #1e3a8a 0%, #1565c0 100%)',
+                labelColor: '#1e3a8a', labelText: 'BANK NUMBER'
+            },
+            ktb: {
+                name: 'KTB', sub: 'ธนาคารกรุงไทย', logo: 'ktb-logo.png',
+                color: '#00a5e5', gradient: 'linear-gradient(90deg, #00a5e5 0%, #008dc9 100%)',
+                labelColor: '#00a5e5', labelText: 'Krungthai'
+            },
+            bay: {
+                name: 'BAY', sub: 'ธนาคารกรุงศรีอยุธยา', logo: 'krungsri-logo.png',
+                color: '#fec42d', gradient: 'linear-gradient(90deg, #fec42d 0%, #f57f17 100%)',
+                labelColor: '#fec42d', labelText: 'KRUNGSRI'
+            },
+            ttb: {
+                name: 'ttb', sub: 'ธนาคารทหารไทยธนชาต', logo: 'ttb-logo.png',
+                color: '#00569a', gradient: 'linear-gradient(90deg, #00569a 0%, #f37021 100%)',
+                labelColor: '#00569a', labelText: 'ttb touch'
+            }
+        };
+
+        let currentBank = 'kbank';
+        let cropper;
+
+        function selectBank(bankKey) {
+            currentBank = bankKey;
+            const config = banks[bankKey];
+            
+            document.querySelectorAll('.bank-item').forEach(el => el.classList.remove('active'));
+            document.querySelector(`.bank-item[onclick="selectBank('${bankKey}')"]`).classList.add('active');
+
+            document.getElementById('display-bank-name').innerText = config.name;
+            document.getElementById('display-bank-name').style.color = config.color;
+            document.getElementById('display-sub-name').innerText = config.sub;
+            
+            const logoEl = document.getElementById('display-logo');
+            logoEl.src = config.logo;
+            logoEl.onerror = function() { this.src = 'logo.png'; };
+
+            document.getElementById('display-label').innerText = config.labelText;
+            document.getElementById('display-label').style.background = config.color;
+            document.getElementById('display-name').style.background = config.gradient;
+            
+            if(bankKey === 'bay') {
+                document.getElementById('display-label').style.color = '#4e3b31';
+                document.getElementById('display-name').style.color = '#4e3b31';
+            } else {
+                document.getElementById('display-label').style.color = 'white';
+                document.getElementById('display-name').style.color = 'white';
+            }
+        }
+
+        function handleQR(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('image-to-crop').src = e.target.result;
+                    document.getElementById('cropModal').style.display = 'flex';
+                    
+                    if (cropper) cropper.destroy();
+                    const image = document.getElementById('image-to-crop');
+                    cropper = new Cropper(image, { aspectRatio: 1, viewMode: 1 });
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+            input.value = ''; 
+        }
+
+        function cropImage() {
+            if (cropper) {
+                const canvas = cropper.getCroppedCanvas({ width: 300, height: 300 });
+                const croppedDataUrl = canvas.toDataURL();
+                
+                document.getElementById('display-qr').src = croppedDataUrl;
+                document.getElementById('display-qr').style.display = 'block';
+                document.getElementById('qr-placeholder').style.display = 'none';
+                
+                closeCropModal();
+            }
+        }
+
+        function closeCropModal() {
+            document.getElementById('cropModal').style.display = 'none';
+            if (cropper) cropper.destroy();
+        }
+
+        function update() {
+            let val = document.getElementById('in-name').value;
+            document.getElementById('display-name').innerText = val ? val.toUpperCase() : "NAME HERE";
+        }
+
+        function formatNum(input) {
+            let val = input.value.replace(/\D/g, '');
+            let formatted = val;
+            if (val.length > 6) formatted = val.substring(0, 3) + '-' + val.substring(3, 6) + '-' + val.substring(6, 10);
+            else if (val.length > 3) formatted = val.substring(0, 3) + '-' + val.substring(3, 6);
+            input.value = formatted;
+            document.getElementById('display-num').innerText = formatted || "000-000-0000";
+        }
+
+        function download() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            const isFacebook = (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1);
+
+            if (isFacebook) {
+                document.getElementById('fbModal').style.display = 'flex';
+                const currentUrl = window.location.href;
+                window.location.href = `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`;
+                return;
+            }
+
+            const el = document.getElementById('card-canvas');
+            html2canvas(el, { scale: 3, backgroundColor: "#ffffff" }).then(canvas => {
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.download = currentBank + '-card.png';
+                    link.href = url; document.body.appendChild(link); link.click();
+                    document.body.removeChild(link); URL.revokeObjectURL(url);
+                }, 'image/png');
+            });
+        }
+
+        function forceOpenChrome() {
+            const currentUrl = window.location.href;
+            window.location.href = `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`;
+        }
+
+        function closeFbModal() { document.getElementById('fbModal').style.display = 'none'; }
+    </script>
+</body>
+</html>
+
+
