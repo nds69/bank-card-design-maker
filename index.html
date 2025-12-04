@@ -127,7 +127,8 @@
         /* --- CONTROLS SECTION --- */
         .section-title {
             font-size: 13px; font-weight: 600; color: var(--icon-color);
-            margin-bottom: 15px; display: block; opacity: 0.8;
+            margin-bottom: 8px; /* Reduced margin */
+            display: block; opacity: 0.9;
         }
 
         /* NEW Download Button Design (Smaller & Centered) */
@@ -150,7 +151,7 @@
         /* Bank Grid */
         .bank-grid {
             display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
         .bank-item {
             display: flex; flex-direction: column; align-items: center; gap: 8px;
@@ -170,10 +171,18 @@
         
         .bank-icon img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* Inputs */
-        .input-group { margin-bottom: 15px; }
+        /* Inputs - Improved Design */
+        .input-group { margin-bottom: 12px; } /* Closer grouping */
+        .input-wrapper { position: relative; width: 100%; }
+        
+        /* Icons inside input */
+        .input-icon {
+            position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+            color: #888; font-size: 16px; z-index: 2; pointer-events: none;
+        }
+
         .input-box {
-            width: 100%; padding: 14px 15px;
+            width: 100%; padding: 14px 15px 14px 45px; /* Left padding for icon */
             border: 1px solid var(--input-border); 
             background: var(--input-bg);
             color: var(--text-color);
@@ -183,6 +192,12 @@
             transition: 0.3s;
         }
         .input-box:focus { border-color: #6c5ce7; box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1); }
+        
+        /* Input Label */
+        .input-label {
+            display: block; margin-bottom: 5px; font-size: 12px; 
+            font-weight: 600; color: var(--icon-color);
+        }
 
         /* --- MODALS (Dark Mode Support) --- */
         .crop-modal-overlay, .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 5000; backdrop-filter: blur(5px); }
@@ -254,45 +269,55 @@
             <i class="fas fa-download"></i> ပုံသိမ်းမည်
         </button>
         <div class="fb-hint">
-            Facebook App တွင် Download မရပါက ညာဘက်အပေါ် (...) နှိပ်ပြီး "Open in Chrome" ဖြင့်ဖွင့်ပါ
+            Facebook Browser တွင် Download မရပါက ညာဘက်အပေါ် (...) နှိပ်ပြီး "Open in Chrome" ဖြင့်ဖွင့်ပါ
         </div>
 
         <!-- 3. Bank Selector -->
         <span class="section-title">ဘဏ် ရွေးချယ်ရန် (Bank)</span>
         <div class="bank-grid">
             <div class="bank-item active" onclick="selectBank('kbank')">
-                <div class="bank-icon" style="color: #00a950;"><img src="kbank.png"></div>
+                <div class="bank-icon" style="color: #00a950;"><img src="logo.png"></div>
                 <span>KBANK</span>
             </div>
             <div class="bank-item" onclick="selectBank('scb')">
-                <div class="bank-icon" style="color: #4e2a84;"><img src="scb.png"></div>
+                <div class="bank-icon" style="color: #4e2a84;"><img src="scb-logo.png"></div>
                 <span>SCB</span>
             </div>
             <div class="bank-item" onclick="selectBank('bbl')">
-                <div class="bank-icon" style="color: #1e3a8a;"><img src="bbl.png"></div>
+                <div class="bank-icon" style="color: #1e3a8a;"><img src="bbl-logo.png"></div>
                 <span>BBL</span>
             </div>
             <div class="bank-item" onclick="selectBank('ktb')">
-                <div class="bank-icon" style="color: #00a5e5;"><img src="ktb.png"></div>
+                <div class="bank-icon" style="color: #00a5e5;"><img src="ktb-logo.png"></div>
                 <span>KTB</span>
             </div>
             <div class="bank-item" onclick="selectBank('bay')">
-                <div class="bank-icon" style="color: #fec42d;"><img src="bay.png"></div>
+                <div class="bank-icon" style="color: #fec42d;"><img src="krungsri-logo.png"></div>
                 <span>BAY</span>
             </div>
             <div class="bank-item" onclick="selectBank('ttb')">
-                <div class="bank-icon" style="color: #00569a;"><img src="ttb.png"></div>
+                <div class="bank-icon" style="color: #00569a;"><img src="ttb-logo.png"></div>
                 <span>TTB</span>
             </div>
         </div>
 
         <!-- 4. Inputs -->
         <span class="section-title">အချက်အလက်များ</span>
+        
         <div class="input-group">
-            <input type="text" class="input-box" id="in-name" placeholder="အမည် (Name)" oninput="update()">
+            <label class="input-label">အမည် (Name)</label>
+            <div class="input-wrapper">
+                <i class="fas fa-user input-icon"></i>
+                <input type="text" class="input-box" id="in-name" placeholder="အမည်ရိုက်ထည့်ပါ" oninput="update()">
+            </div>
         </div>
+
         <div class="input-group">
-            <input type="tel" class="input-box" id="in-num" placeholder="အကောင့်နံပါတ် (000-000-0000)" maxlength="12" oninput="formatNum(this)">
+            <label class="input-label">အကောင့်နံပါတ် (Account No)</label>
+            <div class="input-wrapper">
+                <i class="fas fa-credit-card input-icon"></i>
+                <input type="tel" class="input-box" id="in-num" placeholder="000-000-0000" maxlength="12" oninput="formatNum(this)">
+            </div>
         </div>
 
     </div>
@@ -345,7 +370,6 @@
             }
         }
 
-        // Check saved theme
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') {
             document.body.setAttribute('data-theme', 'dark');
@@ -360,27 +384,27 @@
                 labelColor: '#00a950', labelText: 'BANK NUMBER'
             },
             scb: {
-                name: 'SCB', sub: 'ไทยพาณิชย์', logo: 'scb.png',
+                name: 'SCB', sub: 'ไทยพาณิชย์', logo: 'scb-logo.png',
                 color: '#4e2a84', gradient: 'linear-gradient(90deg, #4e2a84 0%, #7d4198 100%)',
                 labelColor: '#4e2a84', labelText: 'SCB EASY'
             },
             bbl: {
-                name: 'BBL', sub: 'ธนาคารกรุงเทพ', logo: 'bbl.png',
+                name: 'BBL', sub: 'ธนาคารกรุงเทพ', logo: 'bbl-logo.png',
                 color: '#1e3a8a', gradient: 'linear-gradient(90deg, #1e3a8a 0%, #1565c0 100%)',
                 labelColor: '#1e3a8a', labelText: 'BANK NUMBER'
             },
             ktb: {
-                name: 'KTB', sub: 'ธนาคารกรุงไทย', logo: 'ktb.png',
+                name: 'KTB', sub: 'ธนาคารกรุงไทย', logo: 'ktb-logo.png',
                 color: '#00a5e5', gradient: 'linear-gradient(90deg, #00a5e5 0%, #008dc9 100%)',
                 labelColor: '#00a5e5', labelText: 'Krungthai'
             },
             bay: {
-                name: 'BAY', sub: 'ธนาคารกรุงศรีอยุธยา', logo: 'krungsri.png',
+                name: 'BAY', sub: 'ธนาคารกรุงศรีอยุธยา', logo: 'krungsri-logo.png',
                 color: '#fec42d', gradient: 'linear-gradient(90deg, #fec42d 0%, #f57f17 100%)',
                 labelColor: '#fec42d', labelText: 'KRUNGSRI'
             },
             ttb: {
-                name: 'ttb', sub: 'ธนาคารทหารไทยธนชาต', logo: 'ttb.png',
+                name: 'ttb', sub: 'ธนาคารทหารไทยธนชาต', logo: 'ttb-logo.png',
                 color: '#00569a', gradient: 'linear-gradient(90deg, #00569a 0%, #f37021 100%)',
                 labelColor: '#00569a', labelText: 'ttb touch'
             }
@@ -388,6 +412,35 @@
 
         let currentBank = 'kbank';
         let cropper;
+
+        // --- Init & Bank Selection ---
+        window.onload = function() {
+            // Force K-Bank Selection on load to ensure UI is consistent
+            selectBank('kbank');
+            
+            // Check for Auto-Download
+            const params = new URLSearchParams(window.location.search);
+            const nameParam = params.get('name');
+            const numParam = params.get('num');
+            const autoParam = params.get('auto');
+
+            if (nameParam) {
+                document.getElementById('in-name').value = decodeURIComponent(nameParam);
+                update();
+            }
+            if (numParam) {
+                document.getElementById('in-num').value = decodeURIComponent(numParam);
+                formatNum(document.getElementById('in-num'));
+            }
+
+            if (autoParam === 'true') {
+                setTimeout(() => {
+                    generateAndDownload();
+                    const cleanUrl = window.location.pathname;
+                    window.history.replaceState({}, document.title, cleanUrl);
+                }, 1000); 
+            }
+        };
 
         function selectBank(bankKey) {
             currentBank = bankKey;
@@ -476,8 +529,17 @@
                 return;
             }
 
+            generateAndDownload();
+        }
+
+        function generateAndDownload() {
             const el = document.getElementById('card-canvas');
+            // Remove border radius for cleaner crop
+            const originalRadius = el.style.borderRadius;
+            el.style.borderRadius = '0';
+
             html2canvas(el, { scale: 3, backgroundColor: "#ffffff" }).then(canvas => {
+                el.style.borderRadius = originalRadius;
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     const link = document.createElement('a');
