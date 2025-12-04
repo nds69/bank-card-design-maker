@@ -107,6 +107,18 @@
         .download-btn:active { transform: scale(0.95); box-shadow: 0 2px 5px rgba(108, 92, 231, 0.4); }
         .fb-hint { font-size: 11px; color: var(--icon-color); text-align: center; margin-bottom: 25px; opacity: 0.7; }
 
+        /* Reset Button Style */
+        .reset-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%; padding: 12px;
+            background: #ff7675; /* Soft Red */
+            color: white; border: none; border-radius: 12px;
+            font-size: 14px; font-weight: 600;
+            cursor: pointer; margin-top: 10px; margin-bottom: 30px;
+            transition: 0.2s;
+        }
+        .reset-btn:active { transform: scale(0.98); background: #d63031; }
+
         /* Bank Grid */
         .bank-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 25px; }
         .bank-item {
@@ -251,6 +263,11 @@
             </div>
         </div>
 
+        <!-- NEW: Reset Button -->
+        <button class="reset-btn" onclick="resetAll()">
+            <i class="fas fa-redo"></i> အသစ်ပြန်စမည် (Reset All)
+        </button>
+
     </div>
 
     <!-- CROP MODAL -->
@@ -323,7 +340,7 @@
                 labelColor: '#00a5e5', labelText: 'Krungthai'
             },
             bay: {
-                name: 'BAY', sub: 'ธนาคารกรุงศรีอยุธยา', logo: 'krungsri.png',
+                name: 'BAY', sub: 'ธนาคารกรุงศรีอยุธยา', logo: 'bay.png',
                 color: '#fec42d', gradient: 'linear-gradient(90deg, #fec42d 0%, #f57f17 100%)',
                 labelColor: '#fec42d', labelText: 'KRUNGSRI'
             },
@@ -441,6 +458,25 @@
             document.getElementById('display-num').innerText = formatted || "000-000-0000";
         }
 
+        // --- NEW RESET FUNCTION ---
+        function resetAll() {
+            // 1. Clear Inputs
+            document.getElementById('in-name').value = '';
+            document.getElementById('in-num').value = '';
+            
+            // 2. Reset Preview Text
+            update(); // Reset name
+            document.getElementById('display-num').innerText = '000-000-0000'; // Reset number
+
+            // 3. Reset QR
+            document.getElementById('display-qr').src = '';
+            document.getElementById('display-qr').style.display = 'none';
+            document.getElementById('qr-placeholder').style.display = 'flex';
+
+            // 4. Reset Bank (to KBank)
+            selectBank('kbank');
+        }
+
         function download() {
             const ua = navigator.userAgent || navigator.vendor || window.opera;
             const isFacebook = (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1);
@@ -489,5 +525,4 @@
     </script>
 </body>
 </html>
-
 
